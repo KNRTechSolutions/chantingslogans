@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Represents the user profile containing chanting meditation metrics, streaks, settings, and acquired milestones",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique Firebase Authentication UID of the practitioner"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The custom displayed profile name chosen by the user"
+        },
+        "email": {
+          "type": "string",
+          "description": "The verified email of the practitioner"
+        },
+        "totalChants": {
+          "type": "integer",
+          "description": "Cumulative chant count completed across all sessions securely audited on the backend"
+        },
+        "currentStreak": {
+          "type": "integer",
+          "description": "Consecutive days where chanting count was non-zero"
+        },
+        "maxStreak": {
+          "type": "integer",
+          "description": "Inspirational personal record for max daily streak achieved"
+        },
+        "milestonesEarned": {
+          "type": "array",
+          "description": "Collection of unique unlocked reward milestone keys"
+        },
+        "targetDailyGoal": {
+          "type": "integer",
+          "description": "Personal daily chant goal target. Standard baseline is a mala (108 repetitions)"
+        },
+        "lastChantedAt": {
+          "type": "integer",
+          "description": "Precise server-sync unix milliseconds timestamp of the last valid chant repetition"
+        },
+        "dailyChantCounts": {
+          "type": "object",
+          "description": "Key-value pair indexing Gregorian date-keys (YYYY-MM-DD) to total chant counts recorded on that date"
+        }
+      },
+      "required": [
+        "uid",
+        "displayName",
+        "totalChants",
+        "currentStreak",
+        "maxStreak",
+        "milestonesEarned",
+        "targetDailyGoal"
+      ]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Collection mapping authenticated practitioners to their persistent, verified chanting meditation stats"
+    }
+  }
+}

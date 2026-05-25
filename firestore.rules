@@ -1,0 +1,63 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Catch-all Global Safety Net: default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Global Helper Functions (Phase 3: Primitive Definitions)
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Strict schema blueprint validation for profile documents
+    function isValidUserProfile(data) {
+      return data.uid is string &&
+             data.displayName is string &&
+             data.displayName.size() <= 64 &&
+             data.totalChants is int &&
+             data.totalChants >= 0 &&
+             data.currentStreak is int &&
+             data.currentStreak >= 0 &&
+             data.maxStreak is int &&
+             data.maxStreak >= 0 &&
+             data.targetDailyGoal is int &&
+             data.targetDailyGoal > 0 &&
+             data.targetDailyGoal <= 100000;
+    }
+
+    // 3. User profiles collection match rules block
+    match /users/{userId} {
+      // Direct access is locked to the authenticated owner only
+      allow get: if isOwner(userId) && isValidId(userId);
+      
+      // Prohibit list queries to block mass scraping by rogue users or programs
+      allow list: if false;
+
+      // Allow owner to create or update their profile, with mandatory schema checks
+      allow create: if isOwner(userId) && 
+                      isValidId(userId) && 
+                      request.resource.data.keys().hasAll(['uid', 'displayName', 'totalChants', 'currentStreak', 'maxStreak', 'targetDailyGoal']) &&
+                      isValidUserProfile(request.resource.data);
+
+      allow update: if isOwner(userId) && 
+                      isValidId(userId) && 
+                      isValidUserProfile(request.resource.data) &&
+                      request.resource.data.uid == resource.data.uid; // Immortal uid check
+
+      // Delete commands are forbidden
+      allow delete: if false;
+    }
+  }
+}

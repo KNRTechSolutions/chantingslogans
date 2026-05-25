@@ -1,0 +1,6 @@
+{
+  "name": "Chanting Meditation Platform",
+  "description": "A serene chanting meditation website with ambient sounds, persistent daily streaks, milestone trackers, certified achievements, and robust hack-proof verification.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
